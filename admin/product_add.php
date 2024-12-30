@@ -31,12 +31,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } 
 
       // File Upload Validation
-    if (isset($_FILES['profile_pic'])) {
-        $fileTmpName = $_FILES['profile_pic']['tmp_name'];
-        $fileName = $_FILES['profile_pic']['name'];
-        $fileSize = $_FILES['profile_pic']['size'];
-        $fileError = $_FILES['profile_pic']['error'];
-        $fileType = $_FILES['profile_pic']['type'];
+    if (isset($_FILES['image'])) {
+        $fileTmpName = $_FILES['image']['tmp_name'];
+        $fileName = $_FILES['image']['name'];
+        $fileSize = $_FILES['image']['size'];
+        $fileError = $_FILES['image']['error'];
+        $fileType = $_FILES['image']['type'];
 
         // Check if file is uploaded without error
         if ($fileError === UPLOAD_ERR_OK) {
@@ -85,6 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $fileErr = "Profile picture is required.";
         $hasErrors = true;
     }
+ 
  // If no errors, proceed with inserting data into the database
  if (!$hasErrors) {
     require_once('../config/db.php');
@@ -96,13 +97,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $conn->real_escape_string($price);
     $description = $conn->real_escape_string($description);
     $user = $_SESSION['user_id'];
-    $sql = "INSERT INTO product (name, price, description, image, user) VALUES ('$name', '$price', '$description','$filePath', '$user')";
+    $sql = "INSERT INTO product (name, price, description, image, userexp) VALUES ('$name', '$price', '$description','$filePath', '$user')";
 
     if ($conn->query($sql) === TRUE) {
         $success_message = "New record created successfully.";
     } else {
         $error_message = "Product not added";
-        // echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $sql . "<br>" . $conn->error;
     }
 
     // Close the connection
@@ -124,7 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <h6 class="m-0 font-weight-bold text-primary"></h6>
                         </div>
                         <div class="card-body">
-                        <form class="user" method="post">
+                        <form class="user" method="post" enctype="multipart/form-data">
                                 <div class="form-group row">
                                     <div class="col-sm-12 mb-3 mb-sm-0">
                                         <input type="text" class="form-control form-control-user " id="name" placeholder="Name" name="name">

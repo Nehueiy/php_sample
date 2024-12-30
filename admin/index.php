@@ -1,6 +1,8 @@
 <?php 
 
+
 include('common/header.php'); 
+
 ?>
 
                 <!-- Begin Page Content -->

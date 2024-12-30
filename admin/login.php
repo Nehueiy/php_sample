@@ -1,58 +1,3 @@
-<?php
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "project";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Collect POST data
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
-
-    // Use prepared statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM user WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-
-        // Verify password
-        if (password_verify($password, $row['password'])) {
-            // Successful login: Redirect to index.php
-            session_start();
-            $_SESSION['user_id'] = $row['id']; // Save user info in session
-            header("Location: index.php");
-            exit();
-        } else {
-            // Password incorrect
-            echo "<script>alert('Invalid password. Please try again.');</script>";
-        }
-    } else {
-        // No account found
-        echo "<script>alert('No account found with that email.');</script>";
-    }
-
-    $stmt->close();
-}
-
-$conn->close();
-
-?>
-
-
-
-
 <?php 
 // Start the session to track login state
 session_start();
@@ -93,8 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hasErrors = true;
     }
    
-
+  
     if (!$hasErrors) {
+        
         require_once("../config/db.php");
         $email = validate_input($_POST['email']);
         $password = $_POST['password'];
@@ -103,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
          // Start the try-catch block
     try {
         // Prepare SQL query to check if the email exists
-        $sql = "SELECT * FROM users WHERE email = '$email'";
+        $sql = "SELECT * FROM user WHERE email = '$email'";
         // Execute the query
         $result = $conn->query($sql);
 
@@ -111,16 +57,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             // Fetch user data
             $user = $result->fetch_assoc();
-
+            
             // Verify the password using password_verify
             if (password_verify($password, $user['password'])) {
-
+                
                 if($user['status'] == 1){
                     // Successful login
                     $_SESSION['email'] = $email;
                     $_SESSION['user_id'] = $user['id'];
-                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['status'] = $user['status'];
                     header('Location: index.php');
+                    exit();
                 }else{
                     $invalid_message = "Your account is not active. Please check your email for activation link.";
                 }
