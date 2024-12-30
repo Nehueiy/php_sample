@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // INSER QUERY
         // ROLE : 0 = admin, 1 = user, 2 = customer
         try {
-            $sql = "INSERT INTO users (name, email, password,role)VALUES ('$name', '$email', '$password',0)";    
+            $sql = "INSERT INTO user(name, email, password,role)VALUES ('$name', '$email', '$password',0)";    
             // Execute the query
             if ($conn->query($sql) === TRUE) {
                 header("Location:login.php");
