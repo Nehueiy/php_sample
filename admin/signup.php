@@ -18,7 +18,7 @@ if (isset($_SESSION['user_id'])) {
 
 // Initialize error variables
 $nameErr = $emailErr = $passwordErr = $rpasswordErr = "" ;
-$name = $email = $password = $rpassword = "";
+$name = $email = $passwords = $rpassword = "";
 $nameClass = $emailClass = $passwordClass = $rpasswordClass = "";
 
 
@@ -59,9 +59,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $passwordErr = "Password is required";
         $hasErrors = true;
     } else {
-        $password = validate_input($_POST["password"]);
+        $passwords = validate_input($_POST["password"]);
         // Check if name only contains letters and whitespace
-        if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/', $password)) {
+        if (!preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/', $passwords)) {
             $passwordErr = "Password is at least 8 characters long, one uppercase letter, one lowercase letter, and one number";
             $hasErrors = true;
         }
@@ -71,12 +71,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hasErrors = true;
     } else {
         $rpassword = validate_input($_POST["rpassword"]);
-        if($password != $rpassword){
+        if($passwords != $rpassword){
             $rpasswordErr = "Repeat Password not matched";
             $hasErrors = true;
         }
     }
-
+  
     $nameClass = $nameErr ? 'error-border' : '';
     $emailClass = $emailErr ? 'error-border' : '';
     $passwordClass = $passwordErr ? 'error-border' : '';
@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['user_id'] = $email;
         // INSERT QUERY
           $sql = "INSERT INTO user (name, email, password, gender, status)
-         VALUES('$name', '$email', '$password', '$gender', '$status')";
+         VALUES('$name', '$email', '$passwords', '$gender', '$status')";
 
         if ($conn->query($sql) === TRUE) {
         echo "New record created successfully";
@@ -96,6 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "Error: " . $sql . "<br>" . $conn->error;
         }
         header("Location: index.php");
+        exit();
     }
 }
 
