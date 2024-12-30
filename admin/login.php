@@ -53,6 +53,96 @@ $conn->close();
 
 
 
+<?php 
+// Start the session to track login state
+session_start();
+// If the user is already logged in, redirect them to the homepage or the requested page
+if (isset($_SESSION['user_id'])) {
+    // If there's a redirect URL stored, send them back to that page after login
+    if (isset($_SESSION['redirect_url'])) {
+        $redirect_url = $_SESSION['redirect_url'];
+        unset($_SESSION['redirect_url']);  // Remove redirect URL after use
+        header("Location: $redirect_url");
+    } else {
+        // Redirect to the homepage if no redirect URL is set
+        header("Location: index.php");
+    }
+    exit();
+}
+
+// Initialize error variables
+$emailErr = $passwordErr = "" ;
+$email = $password = $invalid_message = "";
+$emailClass = $passwordClass = "";
+
+//SET FLAG
+$hasErrors = false;
+
+// Check if form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    include_once '../helper/index.php';
+   
+    // Validate Email
+    if (empty($_POST["email"])) {
+        $emailErr = "Email is required";
+        $hasErrors = true;
+    }
+    //password is at least 8 characters long and includes at least one uppercase letter, one lowercase letter, and one number.
+    if (empty($_POST["password"])) {
+        $passwordErr = "Password is required";
+        $hasErrors = true;
+    }
+   
+
+    if (!$hasErrors) {
+        require_once("../config/db.php");
+        $email = validate_input($_POST['email']);
+        $password = $_POST['password'];
+        // Escape special characters in user input to prevent SQL injection
+        $email = $conn->real_escape_string($email);
+         // Start the try-catch block
+    try {
+        // Prepare SQL query to check if the email exists
+        $sql = "SELECT * FROM users WHERE email = '$email'";
+        // Execute the query
+        $result = $conn->query($sql);
+
+        // Check if the email exists in the database
+        if ($result->num_rows > 0) {
+            // Fetch user data
+            $user = $result->fetch_assoc();
+
+            // Verify the password using password_verify
+            if (password_verify($password, $user['password'])) {
+
+                if($user['status'] == 1){
+                    // Successful login
+                    $_SESSION['email'] = $email;
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['role'] = $user['role'];
+                    header('Location: index.php');
+                }else{
+                    $invalid_message = "Your account is not active. Please check your email for activation link.";
+                }
+                
+            } else {
+                // Incorrect password
+                $invalid_message = "Incorrect  password.";
+            }
+        } else {
+            // Email not found
+            $invalid_message = "Incorrect email ";
+        }
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage();
+    }
+    }
+}
+    // FOR input border css
+    $emailClass = $emailErr ? 'error-border' : '';
+    $passwordClass = $passwordErr ? 'error-border' : '';
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -96,15 +186,15 @@ $conn->close();
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                     </div>
-                                    <form class="user">
+                                    <form class="user" method="post">
+                                        <span class="text-danger text-sm"><?= $invalid_message; ?></span>
                                         <div class="form-group">
-                                            <input type="email" class="form-control form-control-user"
-                                                id="exampleInputEmail" aria-describedby="emailHelp"
-                                                placeholder="Enter Email Address...">
+                                            <input type="email" class="form-control form-control-user <?= $emailClass ?>" id="exampleInputEmail" aria-describedby="emailHelp"  placeholder="Enter Email Address..." name="email">
+                                            <span class="text-danger text-sm"><?= $emailErr ?></span>
                                         </div>
                                         <div class="form-group">
-                                            <input type="password" class="form-control form-control-user"
-                                                id="exampleInputPassword" placeholder="Password">
+                                            <input type="password" class="form-control form-control-user <?= $passwordClass ?>" id="exampleInputPassword" placeholder="Password" name="password">
+                                            <span class="text-danger text-sm"><?= $passwordErr ?></span>
                                         </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
@@ -113,9 +203,9 @@ $conn->close();
                                                     Me</label>
                                             </div>
                                         </div>
-                                        <a href="index.php" class="btn btn-primary btn-user btn-block">
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
                                             Login
-                                        </a>
+                                        </button>
                                         <hr>
                                         <a href="index.php" class="btn btn-google btn-user btn-block">
                                             <i class="fab fa-google fa-fw"></i> Login with Google
