@@ -1,4 +1,5 @@
 <?php 
+
 // Start the session to track login state
 session_start();
 // If the user is already logged in, redirect them to the homepage or the requested page
@@ -71,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $rpassword = validate_input($_POST["rpassword"]);
         if($password != $rpassword){
-            $rpasswordErr = "Reapeat Password not matched";
+            $rpasswordErr = "Repeat Password not matched";
             $hasErrors = true;
         }
     }
@@ -81,20 +82,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $passwordClass = $passwordErr ? 'error-border' : '';
     $rpasswordClass = $rpasswordErr ? 'error-border' : '';
     if (!$hasErrors) {
-        //require_once("../config/db.php");
+        require_once("../config/db.php");
         $_SESSION['user_id'] = $email;
-        // INSER QUERY
-        //     $sql = "INSERT INTO MyGuests (firstname, lastname, email)
-        // VALUES ('John', 'Doe', 'john@example.com')";
+        // INSERT QUERY
+          $sql = "INSERT INTO user (name, email, password, gender, status)
+         VALUES('$name', '$email', '$password', '$gender', '$status')";
 
-        // if ($conn->query($sql) === TRUE) {
-        // echo "New record created successfully";
-        // redirect("Location:login.php");
-        // exit();
-        // } else {
-        // echo "Error: " . $sql . "<br>" . $conn->error;
-        // }
-        header("Localtion:index.php");
+        if ($conn->query($sql) === TRUE) {
+        echo "New record created successfully";
+        header("Location: login.php");
+        exit();
+        } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+        header("Location: index.php");
     }
 }
 
