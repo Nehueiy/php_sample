@@ -1,214 +1,133 @@
 <?php
-$KHALTI_URL = "https://khalti.com/api/v2/payment/initiate/";  // Replace with the actual Khalti URL
-$KHALTI_KEY = "key 05bf95cc57244045b8df5fad06748dab";  // Your Khalti Secret Key
+// -------------------- CONFIG -------------------- //
+$KHALTI_URL = "https://khalti.com/api/v2/payment/initiate/";
+$KHALTI_KEY = "test_secret_key_here";   // Replace with real Khalti Secret Key
+
 $ESEWA_URL = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
-$ESEWA_MERCHANT_CODE = "EPAYTEST";  // Replace with
-$payment_method = "esewa"; // payment method : esewa or khalti
-$payment_success_url = "";
-$payment_failure_url = "";
-$khalti_response_url = "";
-$website_url = ""; // your website url
+$ESEWA_MERCHANT_CODE = "EPAYTEST";      // Replace with your real merchant code
+$ESEWA_SECRET = "8gBm/:&EnhH.1/q";      // Replace with your real secret
 
-if($payment_method == 'esewa'){?>
+// Change these to your actual URLs
+$payment_success_url = "http://yourwebsite.com/payment_success.php";
+$payment_failure_url = "http://yourwebsite.com/payment_failure.php";
+$khalti_response_url = "http://yourwebsite.com/khalti_response.php";
+$website_url = "http://yourwebsite.com";
 
-<style> b{color: #e96900;padding: 3px 5px;}</style>
-<b>eSewa ID:</b> 9806800001/2/3/4/5 <br><b>Password:</b> Nepal@123 <b>MPIN:</b> 1122 <b>Token:</b>123456 
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/hmac-sha256.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/enc-base64.min.js"></script>
-   <form action="<?= $ESEWA_URL; ?>" method="POST" onsubmit="return generateSignature()" target="_blank">
+// -------------------- SELECT METHOD -------------------- //
+$payment_method = $_GET['method'] ?? "esewa"; // esewa OR khalti
 
-        <table style="display:none">
-            <tr>
-                <td> <strong>Parameter </strong> </td>
-                <td><strong>Value</strong></td>
-            </tr>
-            <tr>
-                <td>Amount:</td>
-                <td> <input type="text" id="amount" name="amount" value="100" class="form" required> <br>
-                </td>
-            </tr>
 
-            <tr>
-                <td>Tax Amount:</td>
-                <td><input type="text" id="tax_amount" name="tax_amount" value="0" class="form" required>
-                </td>
-            </tr>
+// -------------------- ESEWA PAYMENT -------------------- //
+if ($payment_method == "esewa") {
+    // Example payment data
+    $amount = 100;
+    $tax_amount = 0;
+    $total_amount = $amount + $tax_amount;
+    $transaction_uuid = uniqid("txn_");
 
-            <tr>
-                <td>Total Amount:</td>
-                <td><input type="text" id="total_amount" name="total_amount" value="100" class="form" required>
-                </td>
-            </tr>
+    // Generate Signature (Server side – safer!)
+    $data_to_sign = "total_amount={$total_amount},transaction_uuid={$transaction_uuid},product_code={$ESEWA_MERCHANT_CODE}";
+    $signature = base64_encode(hash_hmac('sha256', $data_to_sign, $ESEWA_SECRET, true));
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Pay with eSewa</title>
+    </head>
+    <body>
+        <form action="<?= $ESEWA_URL; ?>" method="POST" target="_blank">
+            <input type="hidden" name="amount" value="<?= $amount; ?>">
+            <input type="hidden" name="tax_amount" value="<?= $tax_amount; ?>">
+            <input type="hidden" name="total_amount" value="<?= $total_amount; ?>">
+            <input type="hidden" name="transaction_uuid" value="<?= $transaction_uuid; ?>">
+            <input type="hidden" name="product_code" value="<?= $ESEWA_MERCHANT_CODE; ?>">
+            <input type="hidden" name="product_service_charge" value="0">
+            <input type="hidden" name="product_delivery_charge" value="0">
+            <input type="hidden" name="success_url" value="<?= $payment_success_url; ?>">
+            <input type="hidden" name="failure_url" value="<?= $payment_failure_url; ?>">
+            <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code">
+            <input type="hidden" name="signature" value="<?= $signature; ?>">
 
-            <tr>
-                <td>Transaction UUID:</td>
-                <td><input type="text" id="transaction_uuid" name="transaction_uuid" value="11-200-111sss1"
-                        class="form" required> </td>
-            </tr>
-
-            <tr>
-                <td>Product Code:</td>
-                <td><input type="text" id="product_code" name="product_code" value="<?= $ESEWA_MERCHANT_CODE; ?>" class="form"
-                        required> </td>
-            </tr>
-
-            <tr>
-                <td>Product Service Charge:</td>
-                <td><input type="text" id="product_service_charge" name="product_service_charge" value="0"
-                        class="form" required> </td>
-            </tr>
-
-            <tr>
-                <td>Product Delivery Charge:</td>
-                <td><input type="text" id="product_delivery_charge" name="product_delivery_charge" value="0"
-                        class="form" required> </td>
-            </tr>
-
-            <tr>
-                <td>Success URL:</td>
-                <td><input type="text" id="success_url" name="success_url" value="<?= $payment_success_url ?>"
-                        class="form" required> </td>
-            </tr>
-
-            <tr>
-                <td>Failure URL:</td>
-                <td><input type="text" id="failure_url" name="failure_url" value="<?= $payment_failure_url ?>" class="form"
-                        required> </td>
-            </tr>
-
-            <tr>
-                <td>signed Field Names:</td>
-                <td><input type="text" id="signed_field_names" name="signed_field_names"
-                        value="total_amount,transaction_uuid,product_code" class="form" required> </td>
-            </tr>
-
-            <tr>
-                <td>Signature:</td>
-                <td><input type="text" id="signature" name="signature"
-                        value="4Ov7pCI1zIOdwtV2BRMUNjz1upIlT/COTxfLhWvVurE=" class="form" required> </td>
-            </tr>
-            <tr>
-                <td>Secret Key:</td>
-                <td><input type="text" id="secret" name="secret" value="8gBm/:&EnhH.1/q" class="form" required>
-                </td>
-            </tr>
-            <br><br>
-        </table>
-        <input value=" Pay with eSewa " type=submit class="button"
-            style="display:block !important; background-color: #60bb46; cursor: pointer; color: #fff; border: none; padding: 5px 10px;'">
-    </form>
-
-    <script>
-        // Function to auto-generate signature
-        function generateSignature() {
-            var currentTime = new Date();
-            var formattedTime = currentTime.toISOString().slice(2, 10).replace(/-/g, '') + '-' + currentTime.getHours() +
-                currentTime.getMinutes() + currentTime.getSeconds();
-            document.getElementById("transaction_uuid").value = formattedTime;
-            var total_amount = document.getElementById("total_amount").value;
-            var transaction_uuid = document.getElementById("transaction_uuid").value;
-            var product_code = document.getElementById("product_code").value;
-            var secret = document.getElementById("secret").value;
-
-            var hash = CryptoJS.HmacSHA256(
-                `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${product_code}`,
-                `${secret}`);
-            var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);
-            document.getElementById("signature").value = hashInBase64;
-            return true;
-        }
-
-        // Event listeners to call generateSignature() when inputs are changed
-        document.getElementById("total_amount").addEventListener("input", generateSignature);
-        document.getElementById("transaction_uuid").addEventListener("input", generateSignature);
-        document.getElementById("product_code").addEventListener("input", generateSignature);
-        document.getElementById("secret").addEventListener("input", generateSignature);
-    </script>
-
-</body>
-
-<?php }
-elseif($payment_method=='khalti'){
-
-$amount = $_POST['amount'];  // Assume the data is posted
-$purchase_order_id = $_POST['purchase_order_id'];
-$user_info = getUserInfo();  // Fetch user info (you can replace with actual function or variable)
-
-if ($user_info) {
-    // Prepare the payload as a JSON object
-    $data = array(
-        "return_url" => $khalti_response_url,
-        "website_url" => $website_url,
-        "amount" => $amount,
-        "purchase_order_id" => $purchase_order_id,
-        "purchase_order_name" => "test",
-        "customer_info" => array(
-            "name" => $user_info['full_name'],  // Assuming 'full_name' is in the user_info array
-            "email" => $user_info['email'],    // Assuming 'email' is in the user_info array
-            "phone" => $user_info['phone']     // Assuming 'phone' is in the user_info array
-        )
-    );
-
-    // Convert data array to JSON string
-    $payload = json_encode($data);
-
-    // Setup headers
-    $headers = array(
-        "Authorization: Key $KHALTI_KEY",
-        "Content-Type: application/json"
-    );
-
-    // Initialize cURL session
-    $ch = curl_init($KHALTI_URL);
-
-    // Set the cURL options
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-    // Execute cURL request and get the response
-    $response = curl_exec($ch);
-
-    // Check if the request was successful
-    if ($response === false) {
-        echo "Error in API request: " . curl_error($ch);
-    } else {
-        // Decode JSON response
-        $response_data = json_decode($response, true);
-        
-        // Check if the API returned a success status
-        if (isset($response_data['pidx']) && isset($response_data['payment_url'])) {
-            $pidx = $response_data['pidx'];
-            $payment_url = $response_data['payment_url'];
-            
-            // Return JSON response with pidx and payment_url
-            echo json_encode(array("pidx" => $pidx, "payment_url" => $payment_url));
-        } else {
-            echo json_encode(array("error" => "Failed to initiate payment."));
-        }
-    }
-
-    // Close cURL session
-    curl_close($ch);
-} else {
-    echo json_encode(array("error" => "User information not found."));
+            <button type="submit" style="background:#60bb46;color:#fff;padding:10px 20px;border:none;cursor:pointer;">
+                Pay with eSewa
+            </button>
+        </form>
+    </body>
+    </html>
+    <?php
 }
 
-// Sample function to retrieve user info (replace with your actual logic)
+
+// -------------------- KHALTI PAYMENT -------------------- //
+elseif ($payment_method == "khalti") {
+    // Example data (normally comes from cart/order)
+    $amount = $_POST['amount'] ?? 10000; // Khalti uses paisa (10000 = Rs.100)
+    $purchase_order_id = $_POST['purchase_order_id'] ?? uniqid("order_");
+
+    $user_info = getUserInfo(); // Replace with actual logged-in user data
+
+    if ($user_info) {
+        $data = array(
+            "return_url" => $khalti_response_url,
+            "website_url" => $website_url,
+            "amount" => $amount,
+            "purchase_order_id" => $purchase_order_id,
+            "purchase_order_name" => "Order Payment",
+            "customer_info" => array(
+                "name" => $user_info['full_name'],
+                "email" => $user_info['email'],
+                "phone" => $user_info['phone']
+            )
+        );
+
+        $payload = json_encode($data);
+
+        $headers = array(
+            "Authorization: Key $KHALTI_KEY",
+            "Content-Type: application/json"
+        );
+
+        $ch = curl_init($KHALTI_URL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            echo "Error in API request: " . curl_error($ch);
+        } else {
+            $response_data = json_decode($response, true);
+
+            if (isset($response_data['pidx']) && isset($response_data['payment_url'])) {
+                $payment_url = $response_data['payment_url'];
+
+                // Redirect user to Khalti payment page
+                header("Location: " . $payment_url);
+                exit;
+            } else {
+                echo "Failed to initiate Khalti payment.";
+            }
+        }
+        curl_close($ch);
+    } else {
+        echo "User information not found.";
+    }
+}
+
+
+// -------------------- HELPER FUNCTION -------------------- //
 function getUserInfo() {
-    // Here we just return dummy data, replace with your actual user data fetching logic
+    // Replace with actual session/user DB data
     return array(
         "full_name" => "John Doe",
         "email" => "john.doe@example.com",
         "phone" => "9800000000"
     );
 }
-}else{
-    echo "Invalid payment method";
+
+else {
+    echo "Invalid payment method!";
 }
-
-
 ?>
