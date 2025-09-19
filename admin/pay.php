@@ -11,7 +11,7 @@ $ESEWA_SECRET = "8gBm/:&EnhH.1/q";      // Replace with your real secret
 $payment_success_url = "http://yourwebsite.com/payment_success.php";
 $payment_failure_url = "http://yourwebsite.com/payment_failure.php";
 $khalti_response_url = "http://yourwebsite.com/khalti_response.php";
-$website_url = "http://yourwebsite.com";
+$website_url = "http://localhost/php_sample/";
 
 // -------------------- SELECT METHOD -------------------- //
 $payment_method = $_GET['method'] ?? "esewa"; // esewa OR khalti
