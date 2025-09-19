@@ -1,7 +1,7 @@
 <?php
 // -------------------- CONFIG -------------------- //
 $KHALTI_URL = "https://khalti.com/api/v2/payment/initiate/";
-$KHALTI_KEY = "test_secret_key_here";   // Replace with real Khalti Secret Key
+$KHALTI_KEY = "test_secret_key_here";   // Replace with your real Khalti Secret Key
 
 $ESEWA_URL = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
 $ESEWA_MERCHANT_CODE = "EPAYTEST";      // Replace with your real merchant code
@@ -18,7 +18,7 @@ $payment_method = $_GET['method'] ?? "esewa"; // esewa OR khalti
 
 
 // -------------------- ESEWA PAYMENT -------------------- //
-if ($payment_method == "esewa") {
+if ($payment_method === "esewa") {
     // Example payment data
     $amount = 100;
     $tax_amount = 0;
@@ -55,11 +55,12 @@ if ($payment_method == "esewa") {
     </body>
     </html>
     <?php
+    exit;
 }
 
 
 // -------------------- KHALTI PAYMENT -------------------- //
-elseif ($payment_method == "khalti") {
+elseif ($payment_method === "khalti") {
     // Example data (normally comes from cart/order)
     $amount = $_POST['amount'] ?? 10000; // Khalti uses paisa (10000 = Rs.100)
     $purchase_order_id = $_POST['purchase_order_id'] ?? uniqid("order_");
@@ -114,6 +115,14 @@ elseif ($payment_method == "khalti") {
     } else {
         echo "User information not found.";
     }
+    exit;
+}
+
+
+// -------------------- INVALID METHOD -------------------- //
+else {
+    echo "Invalid payment method!";
+    exit;
 }
 
 
@@ -125,9 +134,5 @@ function getUserInfo() {
         "email" => "john.doe@example.com",
         "phone" => "9800000000"
     );
-}
-
-else {
-    echo "Invalid payment method!";
 }
 ?>
