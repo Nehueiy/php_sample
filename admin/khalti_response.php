@@ -1,6 +1,5 @@
 <?php
 // khalti_response.php
-
 // Khalti usually returns token + amount in response after payment.
 // You should verify transaction here by calling Khalti’s verification API.
 
