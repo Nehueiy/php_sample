@@ -17,7 +17,8 @@ if($payment_method == 'esewa'){?>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/hmac-sha256.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/enc-base64.min.js"></script>
-    <form action="<?= $ESEWA_URL; ?>" method="POST" onsubmit="generateSignature()" target="_blank">
+   <form action="<?= $ESEWA_URL; ?>" method="POST" onsubmit="return generateSignature()" target="_blank">
+
         <table style="display:none">
             <tr>
                 <td> <strong>Parameter </strong> </td>
@@ -116,6 +117,7 @@ if($payment_method == 'esewa'){?>
                 `${secret}`);
             var hashInBase64 = CryptoJS.enc.Base64.stringify(hash);
             document.getElementById("signature").value = hashInBase64;
+            return true;
         }
 
         // Event listeners to call generateSignature() when inputs are changed
@@ -127,7 +129,8 @@ if($payment_method == 'esewa'){?>
 
 </body>
 
-<?php }elseif($payment_method=='khalti'){
+<?php }
+elseif($payment_method=='khalti'){
 
 $amount = $_POST['amount'];  // Assume the data is posted
 $purchase_order_id = $_POST['purchase_order_id'];
