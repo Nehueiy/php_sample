@@ -8,7 +8,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/php_sample/config/db.php';
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['emai l'];
+    $email = $_POST['email'];
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
 
