@@ -2,7 +2,8 @@
 // reset_password.php
 
 // Include database connection
-require 'config/db.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/php_sample/config/db.php';
+
 
 $message = '';
 
