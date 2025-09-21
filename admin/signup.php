@@ -82,13 +82,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $name = $conn->real_escape_string($name);
         $email = $conn->real_escape_string($email);
         $password = password_hash($password, PASSWORD_DEFAULT);
-        // INSER QUERY
+        // INSERT QUERY
         // ROLE : 0 = admin, 1 = user, 2 = customer
         try {
             $sql = "INSERT INTO user (name, email, password)VALUES ('$name', '$email', '$password')";    
             // Execute the query
             if ($conn->query($sql) === TRUE) {
-                header("Location:login.php");
+                header("Location: index.php");
                 exit();
             } else {
                 // If an error occurs, check if it's a duplicate entry error (code 1062)
