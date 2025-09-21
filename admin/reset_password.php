@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
         // Update the user's password in database
-        $stmt = $mysqli->prepare("UPDATE users SET password=? WHERE email=?");
+        $stmt = $mysqli->prepare("UPDATE user SET password=? WHERE email=?");
         $stmt->bind_param("ss", $hashed_password, $email);
 
         if ($stmt->execute()) {
