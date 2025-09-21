@@ -8,7 +8,7 @@ require $_SERVER['DOCUMENT_ROOT'] . '/php_sample/config/db.php';
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'];
+    $email = $_POST['emai l'];
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
 
@@ -20,9 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
         // Update the user's password in database
-        $stmt = $mysqli->prepare("UPDATE user SET password=? WHERE email=?");
-        $stmt->bind_param("ss", $hashed_password, $email);
+        $stmt = $conn->prepare("UPDATE user SET password=? WHERE email=?");
+$stmt->bind_param("ss", $hashed_password, $email);
+$stmt->execute();
 
+    
         if ($stmt->execute()) {
             $message = "Password updated successfully! You can now <a href='login.php'>login</a>.";
         } else {
