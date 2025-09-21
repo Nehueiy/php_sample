@@ -2,7 +2,7 @@
 // reset_password.php
 
 // Include database connection
-require 'inc/db.php';
+require 'config/db.php';
 
 $message = '';
 
